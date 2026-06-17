@@ -107,3 +107,40 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// Return the MLFQ priority queue of the current process (0=high, 1=mid, 2=low)
+uint64
+sys_getprio(void)
+{
+  return myproc()->priority;
+}
+
+// Fill user-provided meminfo struct with current memory statistics.
+uint64
+sys_meminfo(void)
+{
+  uint64 addr;
+  argaddr(0, &addr);
+  struct meminfo mi;
+  kgetmeminfo(&mi);
+  if(copyout(myproc()->pagetable, addr, (char *)&mi, sizeof(mi)) < 0)
+    return -1;
+  return 0;
+}
+
+// Coalesce adjacent free pages and return number of merges performed.
+uint64
+sys_coalesce(void)
+{
+  return kcoalesce();
+}
+
+// Run kernel-level fragmentation test with n pages.
+// Returns frag_blocks after alternating alloc/free pattern.
+uint64
+sys_fragtest(void)
+{
+  int n;
+  argint(0, &n);
+  return kfragtest(n);
+}

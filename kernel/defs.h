@@ -58,6 +58,9 @@ void            ireclaim(int);
 
 // kalloc.c
 void*           kalloc(void);
+void            kgetmeminfo(struct meminfo*);
+uint64          kfragtest(int);
+int             kcoalesce(void);
 void            kfree(void *);
 void            kinit(void);
 
