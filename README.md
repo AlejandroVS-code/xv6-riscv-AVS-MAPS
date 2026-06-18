@@ -1,6 +1,46 @@
 # xv6-riscv — Proyecto Final Sistemas Operativos
 
-**Grupo:** AVS-MAPS  
+**Integrantes:**
+- Alejandro Valencia Sandoval
+- Maria Alejandra Pizarro
+
+**Universidad:** Universidad del Valle  
+**Curso:** Sistemas Operativos 2026
+
+---
+
+## Descripción general
+
+Este proyecto modifica el sistema operativo académico xv6-riscv en dos componentes fundamentales:
+1. El algoritmo de planificación de CPU (scheduler)
+2. El sistema de gestión de memoria física
+
+---
+
+## Modificación 1: Scheduler MLFQ
+
+**Archivos modificados:** `kernel/proc.h`, `kernel/proc.c`, `kernel/syscall.h`, `kernel/syscall.c`, `kernel/sysproc.c`, `user/user.h`, `user/usys.pl`
+
+**Problema del scheduler original:**  
+xv6 implementa Round Robin puro — recorre el arreglo de procesos en orden y le asigna un turno a cada uno sin distinguir entre procesos interactivos y procesos CPU-bound.
+
+**Solución implementada — MLFQ (Multi-Level Feedback Queue):**  
+Se implementaron 3 colas de prioridad con Round Robin en cada una:
+
+| Cola | Prioridad | Quantum | Tipo de proceso |
+|------|-----------|---------|-----------------|
+| 0    | Alta      | 1 tick  | I/O-bound, interactivos |
+| 1    | Media     | 4 ticks | Mixtos |
+| 2    | Baja      | 8 ticks | CPU-bound |
+
+**Mecanismo de aging:** procesos que esperan 20+ ticks suben una cola (previene starvation).
+
+**Syscall agregada:** `getprio()` — retorna la cola de prioridad actual del proceso.
+
+**Resultado demostrado:**
+cat > README.md << 'EOF'
+# xv6-riscv — Proyecto Final Sistemas Operativos
+
 **Integrantes:**
 - Alejandro Valencia Sandoval
 - Maria Alejandra Pizarro
@@ -72,7 +112,7 @@ After coalesce: Merges performed: 35
 
 ## Requisitos del entorno
 
-- Ubuntu 24.04 LTS (recomendado via VirtualBox o WSL2)
+- Ubuntu 26.04 LTS (recomendado via VirtualBox o WSL2)
 - Toolchain RISC-V:
 
 ```bash
@@ -116,7 +156,7 @@ Demuestra fragmentación de la free list y merges realizados por `coalesce()`.
 
 ## Estructura de ramas
 riscv ← rama principal
-feature/scheduler ← MLFQ scheduler (mergeado via PR)
+feature/scheduler ← MLFQ scheduler
 feature/memory-management ← gestión de memoria (mergeado via PR #1)
 ---
 
