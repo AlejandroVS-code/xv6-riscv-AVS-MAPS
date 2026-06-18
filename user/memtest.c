@@ -2,47 +2,76 @@
 #include "user/user.h"
 
 void
-print_meminfo(const char *label)
+print_point(const char *label, int point)
 {
   struct meminfo mi;
   meminfo(&mi);
-  printf("--- %s ---\n", label);
-  printf("  Free pages  : %ld / %ld\n", mi.free_pages, mi.total_pages);
-  printf("  Used pages  : %ld\n", mi.used_pages);
-  printf("  Frag blocks : %ld\n", mi.frag_blocks);
+  printf("[%d] %s\n", point, label);
+  printf("     free_pages  : %ld\n", mi.free_pages);
+  printf("     frag_blocks : %ld\n", mi.frag_blocks);
+  printf("     utilization : %ld%%\n", (mi.used_pages * 100) / mi.total_pages);
 }
 
 int
 main(void)
 {
-  printf("=== Memory Management Test ===\n\n");
+  printf("=== Memory Fragmentation Metrics Test ===\n\n");
+  printf("Each point measures frag_blocks and free_pages\n");
+  printf("frag_blocks = non-contiguous runs in sorted free list\n\n");
 
-  // --- PART 1: baseline ---
-  print_meminfo("Baseline");
+  // Punto 0: baseline
+  print_point("Baseline (no allocs)", 0);
 
-  // --- PART 2: kernel fragmentation test ---
-  printf("\n[Kernel-level kalloc/kfree test with 32 pages]\n\n");
+  // Punto 1: 16 pages allocated
+  sbrk(4096 * 16);
+  print_point("After allocating 16 pages", 1);
 
+  // Punto 2: 32 pages allocated
+  sbrk(4096 * 16);
+  print_point("After allocating 32 pages total", 2);
+
+  // Punto 3: free even pages (alternating pattern)
+  for(int i = 0; i < 16; i++)
+    sbrk(-4096);
+  print_point("After freeing 16 pages (alternating pattern)", 3);
+
+  // Punto 4: kernel fragtest with 32 pages
+  uint64 frag_during = fragtest(32);
+  printf("[4] Kernel fragtest(32) during alternating free\n");
+  printf("     frag_blocks during : %ld\n\n", frag_during);
+
+  // Punto 5: before coalesce
   struct meminfo before;
   meminfo(&before);
-  printf("Before test:\n");
-  printf("  Free pages  : %ld\n", before.free_pages);
-  printf("  Frag blocks : %ld\n\n", before.frag_blocks);
+  printf("[5] Before coalesce()\n");
+  printf("     frag_blocks : %ld\n\n", before.frag_blocks);
 
-  // Allocate then free alternating pages — creates fragmentation
-  uint64 frag_during = fragtest(32);
-  printf("During alternating free (32 pages):\n");
-  printf("  Frag blocks : %ld\n\n", frag_during);
-
-  // Run coalesce — merges adjacent free blocks
+  // Punto 6: after coalesce
   int merges = coalesce();
-  printf("After coalesce():\n");
-  printf("  Merges performed : %d\n", merges);
-  print_meminfo("Post-coalesce");
+  struct meminfo after;
+  meminfo(&after);
+  printf("[6] After coalesce()\n");
+  printf("     merges performed : %d\n", merges);
+  printf("     frag_blocks      : %ld\n", after.frag_blocks);
+  printf("     frag reduction   : %ld blocks merged\n\n",
+         before.frag_blocks - after.frag_blocks);
 
-  printf("\n[Result]\n");
-  printf("  Sorted free list enables coalesce() to merge adjacent blocks\n");
-  printf("  Original xv6 (unsorted) cannot guarantee adjacency detection\n");
+  // Punto 7: free remaining pages
+  sbrk(-4096 * 16);
+  print_point("After freeing all remaining pages", 7);
+
+  // Punto 8: final coalesce
+  int merges2 = coalesce();
+  struct meminfo final;
+  meminfo(&final);
+  printf("[8] Final coalesce()\n");
+  printf("     merges performed : %d\n", merges2);
+  printf("     frag_blocks      : %ld\n\n", final.frag_blocks);
+
+  printf("=== Summary ===\n");
+  printf("  Total merges by coalesce(): %d\n", merges + merges2);
+  printf("  Original xv6: 0 merges possible (no coalesce, unordered list)\n");
+  printf("  Our xv6     : sorted list enables coalescence\n");
 
   printf("\n=== Memory Test Complete ===\n");
   exit(0);
