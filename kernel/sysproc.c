@@ -144,3 +144,25 @@ sys_fragtest(void)
   argint(0, &n);
   return kfragtest(n);
 }
+
+// Return performance metrics of the current process
+uint64
+sys_getmetrics(void)
+{
+  uint64 addr;
+  argaddr(0, &addr);
+  struct proc *p = myproc();
+  struct procmetrics pm;
+
+  pm.arrival_tick   = p->arrival_tick;
+  pm.first_run_tick = p->first_run_tick;
+  pm.finish_tick    = p->finish_tick;
+  pm.total_wait     = p->total_wait;
+  pm.response_time  = (p->first_run_tick > p->arrival_tick) ?
+                       p->first_run_tick - p->arrival_tick : 0;
+  pm.turnaround     = 0; // set at exit — call after wait()
+
+  if(copyout(p->pagetable, addr, (char *)&pm, sizeof(pm)) < 0)
+    return -1;
+  return 0;
+}

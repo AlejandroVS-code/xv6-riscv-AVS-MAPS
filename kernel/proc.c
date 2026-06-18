@@ -148,6 +148,13 @@ found:
   p->priority = 0;
   p->ticks_used = 0;
   p->wait_ticks = 0;
+
+  // METRICS: initialize performance fields
+  p->arrival_tick = 0;
+  p->first_run_tick = 0;
+  p->finish_tick = 0;
+  p->total_wait = 0;
+  p->first_run_done = 0;
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
@@ -361,6 +368,8 @@ kexit(int status)
   acquire(&p->lock);
 
   p->xstate = status;
+  // METRICS: record finish tick
+  p->finish_tick = ticks;
   p->state = ZOMBIE;
 
   release(&wait_lock);
@@ -448,13 +457,20 @@ scheduler(void)
     // --- AGING: boost processes that have waited too long ---
     for(p = proc; p < &proc[NPROC]; p++){
       acquire(&p->lock);
-      if(p->state == RUNNABLE && p->priority > 0){
-        p->wait_ticks++;
-        if(p->wait_ticks >= MLFQ_AGING){
-          // Move process up one priority level
-          p->priority--;
-          p->ticks_used = 0;
-          p->wait_ticks = 0;
+      if(p->state == RUNNABLE){
+        // METRICS: record arrival tick on first RUNNABLE
+        if(p->arrival_tick == 0)
+          p->arrival_tick = ticks;
+        // METRICS: accumulate waiting time
+        p->total_wait++;
+        if(p->priority > 0){
+          p->wait_ticks++;
+          if(p->wait_ticks >= MLFQ_AGING){
+            // Move process up one priority level
+            p->priority--;
+            p->ticks_used = 0;
+            p->wait_ticks = 0;
+          }
         }
       }
       release(&p->lock);
@@ -469,6 +485,11 @@ scheduler(void)
         if(p->state == RUNNABLE && p->priority == q){
           // Reset wait counter since process is now running
           p->wait_ticks = 0;
+          // METRICS: record first run tick
+          if(!p->first_run_done){
+            p->first_run_tick = ticks;
+            p->first_run_done = 1;
+          }
           p->state = RUNNING;
           c->proc = p;
           swtch(&c->context, &p->context);

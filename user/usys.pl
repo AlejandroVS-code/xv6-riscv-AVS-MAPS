@@ -45,4 +45,5 @@ entry("uptime");
 entry("getprio");
 entry("meminfo");
 entry("fragtest");
+entry("getmetrics");
 entry("coalesce");

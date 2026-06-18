@@ -24,3 +24,4 @@
 #define SYS_meminfo 23
 #define SYS_fragtest 24
 #define SYS_coalesce 25
+#define SYS_getmetrics 26

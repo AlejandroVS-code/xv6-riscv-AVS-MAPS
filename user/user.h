@@ -27,6 +27,7 @@ int uptime(void);
 int getprio(void);
 int meminfo(struct meminfo*);
 int fragtest(int);
+int getmetrics(struct procmetrics*);
 int coalesce(void);
 
 // ulib.c

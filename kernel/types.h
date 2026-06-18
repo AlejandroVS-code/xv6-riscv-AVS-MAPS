@@ -16,3 +16,13 @@ struct meminfo {
   uint64 total_pages;  // total physical pages
   uint64 frag_blocks;  // non-contiguous blocks in free list (fragmentation metric)
 };
+
+// Process metrics structure for getmetrics() syscall
+struct procmetrics {
+  uint64 arrival_tick;    // tick when process first became RUNNABLE
+  uint64 first_run_tick;  // tick when process first got CPU
+  uint64 finish_tick;     // tick when process exited
+  uint64 total_wait;      // total ticks spent waiting for CPU
+  uint64 response_time;   // first_run_tick - arrival_tick
+  uint64 turnaround;      // finish_tick - arrival_tick (set at exit)
+};

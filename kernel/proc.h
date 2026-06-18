@@ -106,4 +106,11 @@ struct proc {
   int priority;                // Queue level: 0=high, 1=mid, 2=low
   int ticks_used;              // CPU ticks consumed in current queue
   int wait_ticks;              // Ticks waited (for aging)
+
+  // METRICS: scheduler performance fields
+  uint64 arrival_tick;         // Tick when process became RUNNABLE first time
+  uint64 first_run_tick;       // Tick when process ran for the first time
+  uint64 finish_tick;          // Tick when process exited
+  uint64 total_wait;           // Total ticks spent RUNNABLE but not RUNNING
+  int    first_run_done;       // Flag: 1 if first_run_tick already recorded
 };
