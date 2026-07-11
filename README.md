@@ -1,8 +1,8 @@
 # xv6-riscv — Proyecto Final Sistemas Operativos
 
 **Integrantes:**
-- Alejandro Valencia Sandoval
-- Maria Alejandra Pizarro
+- Alejandro Valencia Sandoval 2515411
+- Maria Alejandra Pizarro 2519474
 
 **Universidad:** Universidad del Valle  
 **Curso:** Sistemas Operativos 2026
@@ -75,19 +75,6 @@ After coalesce: Merges performed: 35
 
 ---
 
-## Requisitos del entorno
-
-- Ubuntu 24.04 LTS o superior (via VirtualBox o Docker)
-- Toolchain RISC-V:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y git build-essential gdb-multiarch \
-  qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
-```
-
----
-
 ## Opción A: Compilación y ejecución con Docker
 
 > Recomendado si tienes Docker Desktop instalado en Windows.
@@ -115,19 +102,26 @@ Ctrl+A  luego  X
 
 ## Opción B: Compilación y ejecución con VirtualBox + Ubuntu
 
-> Recomendado si tienes VirtualBox con Ubuntu 24.04 o superior.
+> Recomendado si tienes VirtualBox con Ubuntu instalado.
+
+### Paso 1 — Instalar dependencias
 
 ```bash
-# 1. Instalar el toolchain RISC-V (solo la primera vez)
 sudo apt-get update
-sudo apt-get install -y git build-essential gdb-multiarch \
-  qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+sudo apt-get install -y git build-essential gdb-multiarch
+sudo apt-get install -y qemu-system-riscv gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+```
 
-# 2. Clonar el repositorio
+### Paso 2 — Clonar el repositorio
+
+```bash
 git clone https://github.com/AlejandroVS-code/xv6-riscv-AVS-MAPS.git
 cd xv6-riscv-AVS-MAPS
+```
 
-# 3. Compilar y ejecutar xv6
+### Paso 3 — Compilar y ejecutar
+
+```bash
 make qemu
 ```
 
