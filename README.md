@@ -81,7 +81,7 @@ After coalesce: Merges performed: 35
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/AlejandroVS-code/xv6-riscv-AVS-MAPS.git
+git clone --depth 1 https://github.com/AlejandroVS-code/xv6-riscv-AVS-MAPS.git
 cd xv6-riscv-AVS-MAPS
 
 # 2. Construir la imagen (tarda varios minutos la primera vez)
@@ -115,7 +115,7 @@ sudo apt-get install -y qemu-system-riscv gcc-riscv64-linux-gnu binutils-riscv64
 ### Paso 2 — Clonar el repositorio
 
 ```bash
-git clone https://github.com/AlejandroVS-code/xv6-riscv-AVS-MAPS.git
+git clone --depth 1 https://github.com/AlejandroVS-code/xv6-riscv-AVS-MAPS.git
 cd xv6-riscv-AVS-MAPS
 ```
 
